@@ -127,8 +127,8 @@ def query_stores(query_text: str):
     
     chroma_results = chroma_collection.query(query_embeddings=[embedding])
     print("ChromaDB Search Results:")
-    for i, (doc_id, text, score) in enumerate(zip(chroma_results["ids"][0], chroma_results["documents"][0], chroma_results["distances"][0])):
-        print(f"doc::{doc_id} - {text} \n ----> {score}")
+    for i, (doc_id, score) in enumerate(zip(chroma_results["ids"][0], chroma_results["distances"][0])):
+        print(f"{doc_id} \n ----> {score}\n")
      
 
 
