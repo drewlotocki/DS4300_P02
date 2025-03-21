@@ -1,2 +1,2 @@
-Redis Ingestion,ChromaDB Ingestion,Redis Query,ChromaDB Query,Redis Storage (MB),ChromaDB Storage (MB),Number of embeddings in Redis,Number of embeddings Chroma
-0.6140162944793701,4.087846040725708,0.002177715301513672,0.010258913040161133,7.719947814941406,7.341879844665527,297,297
+Redis Ingestion,ChromaDB Ingestion,MongoDB Ingestion,Redis Query,ChromaDB Query,MongoDB Query,Redis Storage (MB),ChromaDB Storage (MB),MongoDB Storage (MB),Number of embeddings in Redis,Number of embeddings in Chroma,Number of embeddings in MongoDB
+0.5486190319061279,3.976475238800049,0.49379467964172363,0.0013790130615234375,0.006748199462890625,0.006539106369018555,7.719963073730469,7.341879844665527,6.887887001037598,297,297,297
