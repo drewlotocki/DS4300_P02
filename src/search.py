@@ -1,7 +1,7 @@
 import redis
 import json
 import numpy as np
-# from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField

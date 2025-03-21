@@ -9,6 +9,7 @@ import time
 import csv
 import sys
 from redis.commands.search.query import Query
+from sentence_transformers import SentenceTransformer
 
 # Initialize Redis and ChromaDB connections
 redis_client = redis.Redis(host="localhost", port=6379, db=0)
@@ -30,7 +31,7 @@ def time_it(func, *args, **kwargs):
     elapsed_time = time.time() - start_time
     return result, elapsed_time
 
-# Clear both Redis and ChromaDB stores
+# Clear both Redis, Mongodb, and ChromaDB stores
 def clear_stores():
     redis_client.flushdb()
     mongo_collection.delete_many({})
@@ -55,6 +56,7 @@ def create_hnsw_index():
         """
     )
 
+# Get embedding vector
 # Get embedding vector
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
     response = ollama.embeddings(model=model, prompt=text)
@@ -98,7 +100,7 @@ def extract_text_from_pdf(pdf_path):
     return [(page_num, page.get_text()) for page_num, page in enumerate(doc)]
 
 # Split text into chunks
-def split_text_into_chunks(text, chunk_size=300, overlap=50):
+def split_text_into_chunks(text, chunk_size=200, overlap=50):
     words = text.split()
     return [" ".join(words[i: i + chunk_size]) for i in range(0, len(words), chunk_size - overlap)]
 
@@ -154,10 +156,10 @@ def query_stores(query_text: str):
     chroma_results, chroma_query_time = time_it(chroma_collection.query, query_embeddings=[embedding], n_results=5)
 
     print("ChromaDB Search Results:")
-    for i, metadata in enumerate(chroma_results["metadatas"][0][:5]):  # Top 5 results
+    for i, metadata in enumerate(chroma_results["metadatas"][0][:5]):
         print(f"File: {metadata['file']}, Page: {metadata['page']}\nChunk: {metadata['chunk']}\nDistance: {chroma_results['distances'][0][i]:.4f}\n")
 
-    # Query MongoDB with Cosine Similarity
+    # Query MongoDB 
     mongo_query_time, mongo_results = 0, []
     all_docs = list(mongo_collection.find({}, {"file": 1, "page": 1, "chunk": 1, "embedding": 1}))
     if all_docs:
@@ -227,7 +229,6 @@ def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query
     # get the number of embeddings
     num_embeddings = chroma_client.get_collection("pdf_embeddings").count()
     num_keys = redis_client.dbsize()
-    print(mongo_client.list_database_names())
     num_docs = mongo_client['pdf_embeddings_db']['embeddings'].count_documents({})
     
     file_exists = os.path.isfile(CSV_FILE)
