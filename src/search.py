@@ -9,29 +9,33 @@ import psutil
 import time
 import csv
 import os
-from instructor import InstructorXL
 
 
 # Initialize models
-embedding_model = InstructorXL()
 #embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 #embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+embedding_model = "nomic-embed-text"
+
+# Using reddis for search
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
 VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
-CSV_FILE = "InstructorXL_query_benchmark_results.csv"
-
+CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{embedding_model}_query_benchmark_results.csv"))
 
 # def cosine_similarity(vec1, vec2):
 #     """Calculate cosine similarity between two vectors."""
 #     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 def get_embedding(text: str) -> list:
-    embedding = embedding_model.encode(text)
-    return embedding.tolist()
+    if embedding_model != "nomic-embed-text": 
+        embedding = embedding_model.encode(text)
+        return embedding.tolist()
+    else:
+        response = ollama.embeddings(model=embedding_model, prompt=text)
+        return response["embedding"]
 
 # ollama model
 """def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
@@ -169,28 +173,6 @@ def interactive_search():
 
         print("\n--- Response ---")
         print(response)
-
-
-# def store_embedding(file, page, chunk, embedding):
-#     """
-#     Store an embedding in Redis using a hash with vector field.
-
-#     Args:
-#         file (str): Source file name
-#         page (str): Page number
-#         chunk (str): Chunk index
-#         embedding (list): Embedding vector
-#     """
-#     key = f"{file}_page_{page}_chunk_{chunk}"
-#     redis_client.hset(
-#         key,
-#         mapping={
-#             "embedding": np.array(embedding, dtype=np.float32).tobytes(),
-#             "file": file,
-#             "page": page,
-#             "chunk": chunk,
-#         },
-#     )
 
 
 if __name__ == "__main__":

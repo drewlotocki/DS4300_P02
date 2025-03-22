@@ -1,3 +1,4 @@
+
 import ollama
 import redis
 import chromadb
@@ -25,7 +26,7 @@ DISTANCE_METRIC = "COSINE"
 CSV_FILE = "benchmark_results.csv"
 
 # Initialize models
-embedding_model = InstructorXL()
+embedding_model = "nomic-embed-text"
 #embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 #embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
@@ -63,8 +64,12 @@ def create_hnsw_index():
 
 # Get embedding vector
 def get_embedding(text: str) -> list:
-    embedding = embedding_model.encode(text)
-    return embedding.tolist()
+    if embedding_model != "nomic-embed-text": 
+        embedding = embedding_model.encode(text)
+        return embedding.tolist()
+    else:
+        response = ollama.embeddings(model=embedding_model, prompt=text)
+        return response["embedding"]
 
 # ollama model
 """def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
@@ -262,7 +267,7 @@ def main():
     clear_stores()
     create_hnsw_index()
     redis_time, chroma_time, mongo_time = process_pdfs("../data/")
-    redis_query, chroma_query, mongo_query = query_stores("What is the capital of France?")
+    redis_query, chroma_query, mongo_query = query_stores("What is a vector database?")
     redis_size, chroma_size, mongo_size = get_storage_space()
     write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size)
     print("\n---Done processing PDFs and benchmarking---\n")
