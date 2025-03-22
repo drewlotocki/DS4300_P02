@@ -5,26 +5,53 @@ from sentence_transformers import SentenceTransformer
 import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField
+import psutil
+import time
+import csv
+import os
+from instructor import InstructorXL
 
 
 # Initialize models
-# embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = InstructorXL()
+#embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+#embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
 VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
+CSV_FILE = "InstructorXL_query_benchmark_results.csv"
+
 
 # def cosine_similarity(vec1, vec2):
 #     """Calculate cosine similarity between two vectors."""
 #     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
+def get_embedding(text: str) -> list:
+    embedding = embedding_model.encode(text)
+    return embedding.tolist()
 
-def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
+# ollama model
+"""def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
     response = ollama.embeddings(model=model, prompt=text)
-    return response["embedding"]
+    return response["embedding"]"""
+
+
+def time_query(query_func, *args, **kwargs):
+    process = psutil.Process(os.getpid())
+    mem_before = process.memory_info().rss / (1024 * 1024) 
+
+    start_time = time.time()
+    result = query_func(*args, **kwargs)
+    elapsed_time = time.time() - start_time
+
+    mem_after = process.memory_info().rss / (1024 * 1024)  
+    mem_usage = mem_after - mem_before
+
+    return result, elapsed_time, mem_usage
 
 
 def search_embeddings(query, top_k=3):
@@ -108,6 +135,15 @@ Answer:"""
     return response["message"]["content"]
 
 
+def log_query_results(query, model_name, elapsed_time, mem_usage):
+    file_exists = os.path.isfile(CSV_FILE)
+    with open(CSV_FILE, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(["Query", "Model", "Time (s)", "Memory Usage (MB)"])
+        writer.writerow([query, model_name, elapsed_time, mem_usage])
+
+
 def interactive_search():
     """Interactive search interface."""
     print("🔍 RAG Search Interface")
@@ -119,8 +155,14 @@ def interactive_search():
         if query.lower() == "exit":
             break
 
-        # Search for relevant embeddings
-        context_results = search_embeddings(query)
+        # Time the search query
+        context_results, elapsed_time, mem_usage = time_query(search_embeddings, query)
+
+        # Log the results
+        log_query_results(query, "InstructorXL", elapsed_time, mem_usage)
+
+        """# Search for relevant embeddings
+        context_results = search_embeddings(query)"""
 
         # Generate RAG response
         response = generate_rag_response(query, context_results)

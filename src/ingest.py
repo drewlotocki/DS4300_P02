@@ -24,6 +24,9 @@ DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 CSV_FILE = "benchmark_results.csv"
 
+# Initialize models
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
 # Utility function to measure execution time
 def time_it(func, *args, **kwargs):
     start_time = time.time()
@@ -57,10 +60,14 @@ def create_hnsw_index():
     )
 
 # Get embedding vector
-# Get embedding vector
-def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
+def get_embedding(text: str) -> list:
+    embedding = embedding_model.encode(text)
+    return embedding.tolist()
+
+# ollama model
+"""def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
     response = ollama.embeddings(model=model, prompt=text)
-    return response["embedding"]
+    return response["embedding"]"""
 
 # Store embedding in Redis, ChromaDB and, MongoDb
 # Store embedding in Redis

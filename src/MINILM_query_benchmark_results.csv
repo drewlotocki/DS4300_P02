@@ -1,0 +1,4 @@
+Query,Model,Time (s),Memory Usage (MB)
+what is an AVL tree,all-MiniLM-L6-v2,0.3467259407043457,44.1640625
+what is different between B+ and AVL trees,all-MiniLM-L6-v2,1.8203599452972412,38.93359375
+what are the 4 rotations for AVL trees,all-MiniLM-L6-v2,0.05013871192932129,0.140625
