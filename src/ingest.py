@@ -292,3 +292,61 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Function to run and time everything
+# def main():
+#     # Define the inputs
+#     chunk_size, overlap, white_space, embedding_model = 200, 50, True, embedding_model_3
+    
+#     # Clear stores and create HNSW index
+#     clear_stores()
+#     create_hnsw_index()
+    
+#     # Time ingestion and querying
+#     redis_time, chroma_time, mongo_time = process_pdfs("../data/", embedding_model, chunk_size, overlap, white_space)
+#     redis_query, chroma_query, mongo_query = query_stores("What is a vector database?", embedding_model)
+#     redis_size, chroma_size, mongo_size = get_storage_space()
+    
+#     # Model type
+#     model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
+    
+#     # Write benchmark results to CSV
+#     write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, model_name)
+#     print("\n---Done processing PDFs and benchmarking---\n")
+
+
+# if __name__ == "__main__":
+#     main()
+
+# def main():
+#     chunk_sizes = [200, 500, 1000]
+#     overlaps = [0, 50, 100]
+#     white_spaces = [True, False]
+
+#     embedding_models = [embedding_model_1, embedding_model_2, embedding_model_3]
+
+#     for embedding_model in embedding_models:
+#         for chunk_size in chunk_sizes:
+#             for overlap in overlaps:
+#                 for white_space in white_spaces:
+#                     # Clear stores and create HNSW index
+#                     clear_stores()
+#                     create_hnsw_index()
+
+#                     # Time ingestion and querying
+#                     redis_time, chroma_time, mongo_time = process_pdfs("../data/", embedding_model, chunk_size, overlap, white_space)
+#                     redis_query, chroma_query, mongo_query = query_stores("What is a vector database?", embedding_model)
+#                     redis_size, chroma_size, mongo_size = get_storage_space()
+
+#                     # Model type
+#                     model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
+
+#                     # Write benchmark results to CSV
+#                     write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query,
+#                                   redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, model_name)
+
+#                     print(f"\n--- Done processing PDFs and benchmarking for {model_name}, chunk size {chunk_size}, overlap {overlap}, whitespace {white_space} ---\n")
+
+
+# if __name__ == "__main__":
+#     main()
