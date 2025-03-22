@@ -30,6 +30,7 @@ CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "result
 embedding_model_1 = "nomic-embed-text"
 embedding_model_2 = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 embedding_model_3 = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+ 
 
 # Utility function to measure execution time
 def time_it(func, *args, **kwargs):
@@ -65,12 +66,11 @@ def create_hnsw_index():
 
 # Get embedding vector
 def get_embedding(text: str, embedding_model) -> list:
-    if embedding_model != "nomic-embed-text": 
-        embedding = embedding_model.encode(text)
-        return embedding.tolist()
-    else:
+    if isinstance(embedding_model, str):
         response = ollama.embeddings(model=embedding_model, prompt=text)
         return response["embedding"]
+    else:
+        return embedding_model.encode(text).tolist()
 
 # ollama model
 """def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
@@ -271,7 +271,7 @@ def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query
 # Main function
 def main():
     # Define the inputs
-    chunk_size, overlap, white_space, embedding_model = 200, 50, True, embedding_model_1
+    chunk_size, overlap, white_space, embedding_model = 200, 50, True, embedding_model_3
     
     # Clear stores and create HNSW index
     clear_stores()
@@ -282,8 +282,11 @@ def main():
     redis_query, chroma_query, mongo_query = query_stores("What is a vector database?", embedding_model)
     redis_size, chroma_size, mongo_size = get_storage_space()
     
+    # Model type
+    model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
+    
     # Write benchmark results to CSV
-    write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, embedding_model)
+    write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, model_name)
     print("\n---Done processing PDFs and benchmarking---\n")
 
 

@@ -29,13 +29,12 @@ CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "result
 #     """Calculate cosine similarity between two vectors."""
 #     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
-def get_embedding(text: str) -> list:
-    if embedding_model != "nomic-embed-text": 
-        embedding = embedding_model.encode(text)
-        return embedding.tolist()
-    else:
+def get_embedding(text: str, embedding_model) -> list:
+    if isinstance(embedding_model, str):
         response = ollama.embeddings(model=embedding_model, prompt=text)
         return response["embedding"]
+    else:
+        return embedding_model.encode(text).tolist()
 
 # ollama model
 """def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
