@@ -9,6 +9,7 @@ import fitz
 import time
 import csv
 import sys
+import string
 from redis.commands.search.query import Query
 from sentence_transformers import SentenceTransformer
 
@@ -23,12 +24,12 @@ VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
-CSV_FILE = "benchmark_results.csv"
+CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", "ingest_benchmark_results.csv"))
 
 # Initialize models
-embedding_model = "nomic-embed-text"
-#embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-#embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+embedding_model_1 = "nomic-embed-text"
+embedding_model_2 = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+embedding_model_3 = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 # Utility function to measure execution time
 def time_it(func, *args, **kwargs):
@@ -63,7 +64,7 @@ def create_hnsw_index():
     )
 
 # Get embedding vector
-def get_embedding(text: str) -> list:
+def get_embedding(text: str, embedding_model) -> list:
     if embedding_model != "nomic-embed-text": 
         embedding = embedding_model.encode(text)
         return embedding.tolist()
@@ -77,6 +78,7 @@ def get_embedding(text: str) -> list:
     return response["embedding"]"""
 
 # Store embedding in Redis, ChromaDB and, MongoDb
+
 # Store embedding in Redis
 def store_embedding_redis(file: str, page: str, chunk: str, embedding: list):
     key = f"{DOC_PREFIX}:{file}_page_{page}_chunk_{chunk}"
@@ -90,7 +92,6 @@ def store_embedding_redis(file: str, page: str, chunk: str, embedding: list):
         },
     )
 
-
 # Store embedding in ChromaDB
 def store_embedding_chroma(chroma_collection,file: str, page: str, chunk: str, embedding: list):
     key = f"{DOC_PREFIX}:{file}_page_{page}_chunk_{chunk}"
@@ -99,7 +100,7 @@ def store_embedding_chroma(chroma_collection,file: str, page: str, chunk: str, e
         embeddings=[embedding], 
         metadatas=[{"file": file, "page": page, "chunk": chunk}]
     )
-
+# Store embedding in MongoDB
 def store_embedding_mongo(mongo_collection, file: str, page: str, chunk: str, embedding: list):
     mongo_collection.insert_one({
         "file": file,
@@ -114,12 +115,15 @@ def extract_text_from_pdf(pdf_path):
     return [(page_num, page.get_text()) for page_num, page in enumerate(doc)]
 
 # Split text into chunks
-def split_text_into_chunks(text, chunk_size=200, overlap=50):
-    words = text.split()
+def split_text_into_chunks(text, chunk_size=200, overlap=50, white_space=False):
+    if white_space:
+        text = text.translate(str.maketrans("", "", string.punctuation))
+        text = " ".join(text.split())   
+    words = text.split() 
     return [" ".join(words[i: i + chunk_size]) for i in range(0, len(words), chunk_size - overlap)]
 
 # Process PDFs and measure ingestion time
-def process_pdfs(data_dir):
+def process_pdfs(data_dir, embedding_model,chunk_size=200, overlap=50, white_space=False):
     total_redis_time, total_chroma_time, total_mongo_time = 0, 0, 0
 
     for file_name in os.listdir(data_dir):
@@ -129,9 +133,9 @@ def process_pdfs(data_dir):
 
             redis_time, chroma_time, mongo_time = 0, 0, 0
             for page_num, text in text_by_page:
-                chunks = split_text_into_chunks(text)
+                chunks = split_text_into_chunks(text, chunk_size, overlap, white_space)
                 for chunk_index, chunk in enumerate(chunks):
-                    embedding = get_embedding(chunk)
+                    embedding = get_embedding(chunk, embedding_model)
                     
                     _, redis_elapsed = time_it(store_embedding_redis, file_name, str(page_num), str(chunk), embedding)
                     redis_time += redis_elapsed
@@ -149,8 +153,8 @@ def process_pdfs(data_dir):
     return total_redis_time, total_chroma_time, total_mongo_time
 
 # Measure query time
-def query_stores(query_text: str):
-    embedding = get_embedding(query_text)
+def query_stores(query_text: str, embedding_model):
+    embedding = get_embedding(query_text, embedding_model)
     query_embedding_bytes = np.array(embedding, dtype=np.float32).tobytes()
 
     # Query Redis
@@ -239,7 +243,7 @@ def get_storage_space():
     return redis_size, chroma_size, mongo_size
 
 # Write benchmark results to CSV
-def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size):
+def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, embedding_model):
     # get the number of embeddings
     num_embeddings = chroma_client.get_collection("pdf_embeddings").count()
     num_keys = redis_client.dbsize()
@@ -253,23 +257,33 @@ def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query
                 "Redis Ingestion", "ChromaDB Ingestion", "MongoDB Ingestion", 
                 "Redis Query", "ChromaDB Query", "MongoDB Query", 
                 "Redis Storage (MB)", "ChromaDB Storage (MB)", "MongoDB Storage (MB)",
-                "Number of embeddings in Redis", "Number of embeddings in Chroma", "Number of embeddings in MongoDB"
+                "Number of embeddings in Redis", "Number of embeddings in Chroma", "Number of embeddings in MongoDB", 
+                "Chunk Size", "Overlap", "White space and Punctuation removal", "Embedding Model"
             ])
         writer.writerow([
             redis_time, chroma_time, mongo_time, 
             redis_query, chroma_query, mongo_query, 
             redis_size, chroma_size, mongo_size, 
-            num_keys, num_embeddings, num_docs
+            num_keys, num_embeddings, num_docs, 
+            chunk_size, overlap, white_space, embedding_model
         ])
 
 # Main function
 def main():
+    # Define the inputs
+    chunk_size, overlap, white_space, embedding_model = 200, 50, True, embedding_model_1
+    
+    # Clear stores and create HNSW index
     clear_stores()
     create_hnsw_index()
-    redis_time, chroma_time, mongo_time = process_pdfs("../data/")
-    redis_query, chroma_query, mongo_query = query_stores("What is a vector database?")
+    
+    # Time ingestion and querying
+    redis_time, chroma_time, mongo_time = process_pdfs("../data/", embedding_model, chunk_size, overlap, white_space)
+    redis_query, chroma_query, mongo_query = query_stores("What is a vector database?", embedding_model)
     redis_size, chroma_size, mongo_size = get_storage_space()
-    write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size)
+    
+    # Write benchmark results to CSV
+    write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query, mongo_query, redis_size, chroma_size, mongo_size, chunk_size, overlap, white_space, embedding_model)
     print("\n---Done processing PDFs and benchmarking---\n")
 
 
