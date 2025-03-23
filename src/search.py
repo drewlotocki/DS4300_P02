@@ -33,7 +33,6 @@ embedding_model, starter_prompt, llm_model = embedding_model_3, starter_prompt_1
 # Using reddis for search
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
-VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
@@ -42,7 +41,7 @@ DISTANCE_METRIC = "COSINE"
 # Build csv file path
 model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
 CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{model_name[len('sentence-transformers/'):]}_query_benchmark_results.csv"))
-
+VECTOR_DIM = len(embedding_model.encode("test")) if not isinstance(embedding_model, str) else 768
 
 
 # Get the embedding for a given text
@@ -91,7 +90,7 @@ def search_embeddings(query, top_k=3):
         results = redis_client.ft(INDEX_NAME).search(
             q, query_params={"vec": query_vector}
         )
-
+ 
         # Transform results into the expected format
         top_results = [
             {
@@ -102,7 +101,6 @@ def search_embeddings(query, top_k=3):
             }
             for result in results.docs
         ][:top_k]
-
         # Print results for debugging
         for result in top_results:
             print(

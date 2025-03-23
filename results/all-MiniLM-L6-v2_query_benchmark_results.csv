@@ -9,3 +9,7 @@ write a reddis query to find all the movies created after 2012 with genere = com
 what is an avl tree,sentence-transformers/all-MiniLM-L6-v2,0.12004685401916504,18.984375
 what is an llm,sentence-transformers/all-MiniLM-L6-v2,0.2096250057220459,36.53125
 
+what is an llm,sentence-transformers/all-MiniLM-L6-v2,0.22108006477355957,27.34375
+what is a query,sentence-transformers/all-MiniLM-L6-v2,0.19761919975280762,28.546875
+what is a llm,sentence-transformers/all-MiniLM-L6-v2,0.21496796607971191,36.59375
+what is ollama,sentence-transformers/all-MiniLM-L6-v2,0.11850118637084961,15.625
