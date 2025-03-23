@@ -14,7 +14,13 @@ import os
 # Initialize models
 #embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 #embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-embedding_model = "nomic-embed-text"
+model_1 = "nomic-embed-text"
+model_2 = "all-mpnet-base-v2"
+model_3 = "all-MiniLM-L6-v2"
+embedding_model_1 = "nomic-embed-text"
+embedding_model_2 = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+embedding_model_3 = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
 
 # Using reddis for search
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
@@ -23,7 +29,10 @@ VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
-CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{embedding_model}_query_benchmark_results.csv"))
+
+embedding_model = embedding_model_3
+name_model = model_3
+CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{name_model}_query_benchmark_results.csv"))
 
 # def cosine_similarity(vec1, vec2):
 #     """Calculate cosine similarity between two vectors."""
@@ -59,7 +68,7 @@ def time_query(query_func, *args, **kwargs):
 
 def search_embeddings(query, top_k=3):
 
-    query_embedding = get_embedding(query)
+    query_embedding = get_embedding(query, embedding_model)
 
     # Convert embedding to bytes for Redis search
     query_vector = np.array(query_embedding, dtype=np.float32).tobytes()
