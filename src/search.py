@@ -1,5 +1,4 @@
 import redis
-import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import ollama
@@ -59,7 +58,7 @@ def time_query(query_func, *args, **kwargs):
 
 def search_embeddings(query, top_k=3):
 
-    query_embedding = get_embedding(query)
+    query_embedding = get_embedding(query, embedding_model)
 
     # Convert embedding to bytes for Redis search
     query_vector = np.array(query_embedding, dtype=np.float32).tobytes()

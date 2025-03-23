@@ -1,0 +1,2 @@
+Redis Ingestion,ChromaDB Ingestion,MongoDB Ingestion,Redis Query,ChromaDB Query,MongoDB Query,Redis Storage (MB),ChromaDB Storage (MB),MongoDB Storage (MB),Number of embeddings in Redis,Number of embeddings in Chroma,Number of embeddings in MongoDB,Chunk Size,Overlap,White space and Punctuation removal,Embedding Model
+0.5860247611999512,4.442142724990845,0.5092661380767822,0.0014050006866455078,0.007013082504272461,0.0068509578704833984,8.064521789550781,8.01706314086914,7.087591171264648,325,325,325,200,50,True,nomic-embed-text
