@@ -215,9 +215,6 @@ def interactive_search():
         # Log the results
         log_query_results(query, model_name, elapsed_time, mem_usage)
 
-        """ Search for relevant embeddings
-        context_results = search_embeddings(query)"""
-
         # Generate RAG response
         response = generate_rag_response(query, context_results, starter_prompt, llm_model)
 
