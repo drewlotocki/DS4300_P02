@@ -20,7 +20,6 @@ mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
 mongo_db = mongo_client["pdf_embeddings_db"]
 mongo_collection = mongo_db["embeddings"]
 
-VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
@@ -51,7 +50,7 @@ def clear_stores():
     chroma_collection = chroma_client.get_or_create_collection(name="pdf_embeddings", metadata={"hnsw:space": "cosine"})
 
 # Create Redis HNSW index
-def create_hnsw_index():
+def create_hnsw_index(VECTOR_DIM):
     try:
         redis_client.execute_command(f"FT.DROPINDEX {INDEX_NAME} DD")
     except redis.exceptions.ResponseError:
@@ -272,10 +271,10 @@ def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query
 def main():
     # Define the inputs
     chunk_size, overlap, white_space, embedding_model = 200, 50, True, embedding_model_3
-    
+    VECTOR_DIM = len(embedding_model.encode("test")) if not isinstance(embedding_model, str) else 768
     # Clear stores and create HNSW index
     clear_stores()
-    create_hnsw_index()
+    create_hnsw_index(VECTOR_DIM)
     
     # Time ingestion and querying
     redis_time, chroma_time, mongo_time = process_pdfs("../data/", embedding_model, chunk_size, overlap, white_space)
@@ -305,12 +304,13 @@ if __name__ == "__main__":
 #     embedding_models = [embedding_model_1, embedding_model_2, embedding_model_3]
 
 #     for embedding_model in embedding_models:
+#         VECTOR_DIM = len(embedding_model.encode("test")) if not isinstance(embedding_model, str) else 768
 #         for chunk_size in chunk_sizes:
 #             for overlap in overlaps:
 #                 for white_space in white_spaces:
 #                     # Clear stores and create HNSW index
 #                     clear_stores()
-#                     create_hnsw_index()
+#                     create_hnsw_index(VECTOR_DIM)
 
 #                     # Time ingestion and querying
 #                     redis_time, chroma_time, mongo_time = process_pdfs("../data/", embedding_model, chunk_size, overlap, white_space)
