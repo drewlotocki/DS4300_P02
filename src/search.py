@@ -9,17 +9,26 @@ import time
 import csv
 import os
 
+# Starter Prompt
+starter_prompt_1 = """You are a helpful AI assistant. 
+    Use the following context to answer the query as accurately as possible. If the context is 
+    not relevant to the query, say 'No Answer Found'."""
+
+starter_prompt_2 = """You are a powerful Data Engineering AI.  
+Use the provided context to generate precise and relevant insights. If the data is insufficient, reply 'No Answer Found'."""  
 
 # Initialize models
-#embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-#embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-model_1 = "nomic-embed-text"
-model_2 = "all-mpnet-base-v2"
-model_3 = "all-MiniLM-L6-v2"
 embedding_model_1 = "nomic-embed-text"
 embedding_model_2 = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 embedding_model_3 = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
+# LLM Model
+ollama_model_1 = "llama3.2:latest"
+ollama_model_2 = "mistral:latest"
+ollama_model_3 = "dolphin-phi:latest"
+
+# Important inputs
+embedding_model, starter_prompt, llm_model = embedding_model_3, starter_prompt_1, ollama_model_3
 
 # Using reddis for search
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
@@ -29,26 +38,20 @@ INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
-embedding_model = embedding_model_3
-name_model = model_3
-CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{name_model}_query_benchmark_results.csv"))
 
-# def cosine_similarity(vec1, vec2):
-#     """Calculate cosine similarity between two vectors."""
-#     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+# Build csv file path
+model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
+CSV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "results", f"{model_name[len('sentence-transformers/'):]}_query_benchmark_results.csv"))
 
+
+
+# Get the embedding for a given text
 def get_embedding(text: str, embedding_model) -> list:
     if isinstance(embedding_model, str):
         response = ollama.embeddings(model=embedding_model, prompt=text)
         return response["embedding"]
     else:
         return embedding_model.encode(text).tolist()
-
-# ollama model
-"""def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
-
-    response = ollama.embeddings(model=model, prompt=text)
-    return response["embedding"]"""
 
 
 def time_query(query_func, *args, **kwargs):
@@ -113,7 +116,7 @@ def search_embeddings(query, top_k=3):
         return []
 
 
-def generate_rag_response(query, context_results):
+def generate_rag_response(query, context_results, starter_prompt, llm_model):
 
     # Prepare context string
     context_str = "\n".join(
@@ -127,9 +130,7 @@ def generate_rag_response(query, context_results):
     print(f"context_str: {context_str}")
 
     # Construct prompt with context
-    prompt = f"""You are a helpful AI assistant. 
-    Use the following context to answer the query as accurately as possible. If the context is 
-    not relevant to the query, say 'No Answer Found'.
+    prompt = f"""{starter_prompt}
 
 Context:
 {context_str}
@@ -140,7 +141,7 @@ Answer:"""
 
     # Generate response using Ollama
     response = ollama.chat(
-        model="llama3.2:latest", messages=[{"role": "user", "content": prompt}]
+        model= llm_model, messages=[{"role": "user", "content": prompt}]
     )
     # mistral:latest
     return response["message"]["content"]
@@ -170,13 +171,13 @@ def interactive_search():
         context_results, elapsed_time, mem_usage = time_query(search_embeddings, query)
 
         # Log the results
-        log_query_results(query, "InstructorXL", elapsed_time, mem_usage)
+        log_query_results(query, model_name, elapsed_time, mem_usage)
 
-        """# Search for relevant embeddings
+        """ Search for relevant embeddings
         context_results = search_embeddings(query)"""
 
         # Generate RAG response
-        response = generate_rag_response(query, context_results)
+        response = generate_rag_response(query, context_results, starter_prompt, llm_model)
 
         print("\n--- Response ---")
         print(response)

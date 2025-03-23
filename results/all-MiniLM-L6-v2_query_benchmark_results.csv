@@ -1,4 +1,11 @@
 Query,Model,Time (s),Memory Usage (MB)
-what is a B+ tree used for,InstructorXL,0.44281816482543945,43.87109375
-what is an AVL tree,InstructorXL,0.1182088851928711,43.765625
-whats a b+ tree,InstructorXL,0.09461045265197754,44.0390625
+what is a B+ tree used for,sentence-transformers/all-MiniLM-L6-v2,0.44281816482543945,43.87109375
+what is an AVL tree,sentence-transformers/all-MiniLM-L6-v2,0.1182088851928711,43.765625
+whats a b+ tree,sentence-transformers/all-MiniLM-L6-v2,0.09461045265197754,44.0390625
+comare avl and b+ trees,sentence-transformers/all-MiniLM-L6-v2,0.2626681327819824,28.3125
+when is a b+ tree better than an avl tree,sentence-transformers/all-MiniLM-L6-v2,0.2760159969329834,22.609375
+when is a b+ tree better than an val tree,sentence-transformers/all-MiniLM-L6-v2,1.248161792755127,42.84375
+write a reddis query to find all the movies created after 2012 with genere = comedy only show the movie name,sentence-transformers/all-MiniLM-L6-v2,0.20374202728271484,27.421875
+what is an avl tree,sentence-transformers/all-MiniLM-L6-v2,0.12004685401916504,18.984375
+what is an llm,sentence-transformers/all-MiniLM-L6-v2,0.2096250057220459,36.53125
+
