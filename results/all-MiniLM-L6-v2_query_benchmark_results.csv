@@ -7,4 +7,3 @@ when is a b+ tree better than an avl tree,sentence-transformers/all-MiniLM-L6-v2
 when is a b+ tree better than an val tree,sentence-transformers/all-MiniLM-L6-v2,1.248161792755127,42.84375
 write a reddis query to find all the movies created after 2012 with genere = comedy only show the movie name,sentence-transformers/all-MiniLM-L6-v2,0.20374202728271484,27.421875
 what is an avl tree,sentence-transformers/all-MiniLM-L6-v2,0.12004685401916504,18.984375
-what is an llm,sentence-transformers/all-MiniLM-L6-v2,0.2096250057220459,36.53125

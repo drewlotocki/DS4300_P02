@@ -1,9 +1,12 @@
 import redis
+import chromadb
+import pymongo
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField
+from scipy.spatial.distance import cosine
 import psutil
 import time
 import csv
@@ -27,16 +30,22 @@ ollama_model_1 = "llama3.2:latest"
 ollama_model_2 = "mistral:latest"
 ollama_model_3 = "dolphin-phi:latest"
 
-# Important inputs
-embedding_model, starter_prompt, llm_model = embedding_model_3, starter_prompt_1, ollama_model_3
+
 
 # Using reddis for search
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
+chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+chroma_collection = chroma_client.get_or_create_collection(name="pdf_embeddings", metadata={"hnsw:space": "cosine"})
+mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
+mongo_db = mongo_client["pdf_embeddings_db"]
+mongo_collection = mongo_db["embeddings"]
 
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
+# Important inputs
+embedding_model, starter_prompt, llm_model, database = embedding_model_3, starter_prompt_1, ollama_model_3, "chroma"
 
 # Build csv file path
 model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
@@ -67,52 +76,87 @@ def time_query(query_func, *args, **kwargs):
     return result, elapsed_time, mem_usage
 
 
-def search_embeddings(query, top_k=3):
-
+def search_embeddings(query, top_k=3, database= "redis"):
     query_embedding = get_embedding(query, embedding_model)
-
-    # Convert embedding to bytes for Redis search
-    query_vector = np.array(query_embedding, dtype=np.float32).tobytes()
-
+    
     try:
-        # Construct the vector similarity search query
-        # Use a more standard RediSearch vector search syntax
-        # q = Query("*").sort_by("embedding", query_vector)
-
+        # Redis Search
         q = (
             Query("*=>[KNN 5 @embedding $vec AS vector_distance]")
             .sort_by("vector_distance")
             .return_fields("id", "file", "page", "chunk", "vector_distance")
             .dialect(2)
         )
-
-        # Perform the search
-        results = redis_client.ft(INDEX_NAME).search(
-            q, query_params={"vec": query_vector}
-        )
- 
-        # Transform results into the expected format
-        top_results = [
+        redis_results = redis_client.ft(INDEX_NAME).search(q, query_params={"vec": np.array(query_embedding, dtype=np.float32).tobytes()})
+        top_redis_results = [
             {
                 "file": result.file,
                 "page": result.page,
                 "chunk": result.chunk,
                 "similarity": result.vector_distance,
             }
-            for result in results.docs
+            for result in redis_results.docs
         ][:top_k]
-        # Print results for debugging
-        for result in top_results:
-            print(
-                f"---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}"
-            )
+        for result in top_redis_results:
+            print(f"Redis ---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}")
+        
+        # ChromaDB Search
+        chroma_results = chroma_collection.query(query_embeddings=[query_embedding], n_results=5)
+        metadata = chroma_results.get("metadatas", [[]])
+        distances = chroma_results.get("distances", [[]])
+        top_chroma_results = [
+            {
+                "file": result["file"],
+                "page": result["page"],
+                "chunk": result["chunk"],
+                "similarity": distances[0][i]
+            }
+            for i, result in enumerate(metadata[0][:top_k])
+        ]
+        for result in top_chroma_results:
+            print(f"ChromaDB ---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}")
+        
+        # MongoDB Search
+        mongo_results = mongo_collection.find({}, {"file": 1, "page": 1, "chunk": 1, "embedding": 1})
+        scored_results = []
 
-        return top_results
+        for doc in mongo_results:
+            if "embedding" not in doc or not doc["embedding"]:
+                continue 
+            
+            doc_embedding = np.array(doc["embedding"], dtype=np.float32)
+            if doc_embedding.size == 0 or len(doc_embedding) != len(query_embedding):
+                continue  
 
+            similarity = 1 - cosine(query_embedding, doc_embedding)
+            scored_results.append({
+                "file": doc["file"],
+                "page": doc["page"],
+                "chunk": doc["chunk"],
+                "similarity": similarity,
+            })
+
+        scored_results.sort(key=lambda x: x["similarity"], reverse=True)
+        top_mongo_results = scored_results[:top_k]
+
+        for result in top_mongo_results:
+            print(f"MongoDB ---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}")
+        
+        # Return results for the db
+        if database == "redis":
+            return top_redis_results
+        elif database == "chroma":
+            return top_chroma_results
+        elif database == "mongo":
+            return top_mongo_results
+        else:
+            print("Not redis, chroma, or mongo.")
+            return []
+    
     except Exception as e:
-        print(f"Search error: {e}")
+        print(f"Error: {e}")
         return []
-
+ 
 
 def generate_rag_response(query, context_results, starter_prompt, llm_model):
 
@@ -125,7 +169,7 @@ def generate_rag_response(query, context_results, starter_prompt, llm_model):
         ]
     )
 
-    print(f"context_str: {context_str}")
+    print(f"\ncontext_str: {context_str}")
 
     # Construct prompt with context
     prompt = f"""{starter_prompt}
@@ -166,7 +210,7 @@ def interactive_search():
             break
 
         # Time the search query
-        context_results, elapsed_time, mem_usage = time_query(search_embeddings, query)
+        context_results, elapsed_time, mem_usage = time_query(search_embeddings, query, 3, database)
 
         # Log the results
         log_query_results(query, model_name, elapsed_time, mem_usage)
