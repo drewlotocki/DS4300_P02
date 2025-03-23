@@ -1,4 +1,4 @@
 Query,Model,Time (s),Memory Usage (MB)
-what is an AVL tree,InstructorXL,0.07239699363708496,1.09375
-what is different between B+ and AVL trees,InstructorXL,0.06314802169799805,0.078125
-what are the 4 rotations for AVL trees,InstructorXL,0.05151987075805664,0.90625
+what is an AVL tree,nomic-embed-text,0.07239699363708496,1.09375
+what is different between B+ and AVL trees,nomic-embed-text,0.06314802169799805,0.078125
+what are the 4 rotations for AVL trees,nomic-embed-text,0.05151987075805664,0.90625
