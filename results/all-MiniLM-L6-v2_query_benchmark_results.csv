@@ -7,3 +7,8 @@ when is a b+ tree better than an avl tree,sentence-transformers/all-MiniLM-L6-v2
 when is a b+ tree better than an val tree,sentence-transformers/all-MiniLM-L6-v2,1.248161792755127,42.84375
 write a reddis query to find all the movies created after 2012 with genere = comedy only show the movie name,sentence-transformers/all-MiniLM-L6-v2,0.20374202728271484,27.421875
 what is an avl tree,sentence-transformers/all-MiniLM-L6-v2,0.12004685401916504,18.984375
+what is an llm,sentence-transformers/all-MiniLM-L6-v2,0.2096250057220459,36.53125"insert this list into a B+ tree with n=4 and show me each step: [85, 62, 14, 49, 73, 58, 25, 91]",sentence-transformers/all-MiniLM-L6-v2,0.10113859176635742,1.38671875
+"insert this list into a B+ tree with n=4 and show me each step: [85, 62, 14, 49, 73, 58, 25, 91]",sentence-transformers/all-MiniLM-L6-v2,0.11114263534545898,1.41015625
+"insert these numbers into a B+ tree with n=4 and show me each step: 85, 62, 14, 49, 73, 58, 25, 91",sentence-transformers/all-MiniLM-L6-v2,0.7246072292327881,57.1015625
+"insert the following values into an AVL tree: 20, 40, 60, 80, 89, 70, 30",sentence-transformers/all-MiniLM-L6-v2,0.11351823806762695,10.75390625
+show me the rotations to fix an RL issue in an AVL tree,sentence-transformers/all-MiniLM-L6-v2,0.13655829429626465,9.484375
