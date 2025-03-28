@@ -1,0 +1,5 @@
+Query,Model,Time (s),Memory Usage (MB)
+what is the differnce between binary search and linear search,nomic-embed-text,0.10834932327270508,7.59375
+"write a py mongo query to answer this: How many movies released each year have a plot that contains some type of police activity (i.e., plot contains the word ""police"")? The returned data should be in ascending order by year.",nomic-embed-text,0.3994779586791992,4.34375
+" write a py mongo query to answer this: How many movies released each year have a plot that contains some type of police activity (i.e., plot contains the word ""police"")? The returned data should be in ascending order by year.",nomic-embed-text,0.13420796394348145,9.03125
+what is an avl tree,nomic-embed-text,0.7164318561553955,10.140625

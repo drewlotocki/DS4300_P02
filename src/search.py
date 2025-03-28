@@ -45,7 +45,7 @@ DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
 # Important inputs
-embedding_model, starter_prompt, llm_model, database = embedding_model_3, starter_prompt_1, ollama_model_3, "chroma"
+embedding_model, starter_prompt, llm_model, database = embedding_model_1, starter_prompt_1, ollama_model_1, "redis"
 
 # Build csv file path
 model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)
