@@ -1,3 +1,4 @@
+pip install jupyterlab
 ollama==0.4.6
 redis==5.2.1
 chromadb==0.5.16
@@ -5,4 +6,6 @@ numpy==1.26.4
 pymongo==4.10.1
 PyMuPDF==1.24.11 
 sentence-transformers==3.3.1
+pandas==2.2.3
+matplotlib==3.8.2
 psutil==6.1.1
