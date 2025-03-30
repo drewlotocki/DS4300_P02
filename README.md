@@ -40,3 +40,4 @@ where the chunk size and overlap are integers, white space is boolean (Tells the
 - The Practical_2.ipynb file comtains all the results graphed in the presentation
 - The results folder contains all of the information compiled when running the script
 - The data folder contains all the documents one can add to the project (they must be in pdf form)
+- At the bottom of `src/ingest.py` there is a commented out main function to generate all the premutaions of different read ins
