@@ -12,7 +12,7 @@
 Docker, change the port number in the creation of the Redis client in both python files in `src`.
 - Chroma running (Docker container is fine) on port 8000. If that port is mapped to another port in 
 Docker, change the port number in the creation of the Chroma client in both python files in `src`.
-- MongoDB dwolaoad and configure the compass ([mongodb.com/try/download/compass]) for your operating system. Then run Mongodb Community Server (Docker container is fine) on port 27017. If that port is mapped to another port in 
+- MongoDB dwolaoad and configure the compass ([Mongodb.com](mongodb.com/try/download/compass)) for your operating system. Then run Mongodb Community Server (Docker container is fine) on port 27017. If that port is mapped to another port in 
 Docker, change the port number in the creation of the Chroma client in both python files in `src`.
 
 ### Requiremnts
