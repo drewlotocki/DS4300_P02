@@ -1,4 +1,5 @@
 # Ollama RAG Ingest and Search
+## Cody Ho and Andrew Lotocki
 
 # Setup the Enivroment
 
@@ -31,7 +32,7 @@ where the chunk size and overlap are integers, white space is boolean (Tells the
 - In line 48 of `src/search.py` one can adjust the parameters embedding_model, starter_prompt, llm_model, database. Where embedding model options are detailed in lines 24-26, the starter prompt options are in lines 16-21, the llm model options are in lines 29-31, and the databse you wish to query from (they should all work the same after running ingest) are the choice of one of the strings ("redis", "chroma", "mongo")
 
 - Note: After running ingest the embedding model in search must be the same one you chose for ingest.
-- Note: You must run ingest before search
+- Note: You must run `src/ingest.py` before `src/search.py`
 
 
 ## Extras
