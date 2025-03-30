@@ -1,4 +1,5 @@
 # Ollama RAG Ingest and Search
+## Team Huge Data LLC
 ## Cody Ho and Andrew Lotocki
 
 # Setup the Enivroment
