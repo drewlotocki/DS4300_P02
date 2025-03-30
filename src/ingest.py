@@ -270,7 +270,7 @@ def write_results(redis_time, chroma_time, mongo_time, redis_query, chroma_query
 # Main function
 def main():
     # Define the inputs
-    chunk_size, overlap, white_space, embedding_model = 300, 50, True, embedding_model_1
+    chunk_size, overlap, white_space, embedding_model = 500, 100, True, embedding_model_2
     VECTOR_DIM = len(embedding_model.encode("test")) if not isinstance(embedding_model, str) else 768
     # Clear stores and create HNSW index
     clear_stores()

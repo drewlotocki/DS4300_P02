@@ -18,7 +18,8 @@ starter_prompt_1 = """You are a helpful AI assistant.
     not relevant to the query, say 'No Answer Found'."""
 
 starter_prompt_2 = """You are a powerful Data Engineering AI.  
-Use the provided context to generate precise and relevant insights. If the data is insufficient, reply 'No Answer Found'."""  
+Use the provided context to generate precise and relevant insights. 
+If the data is insufficient reference outside content and make it clear what you referenced."""  
 
 # Initialize models
 embedding_model_1 = "nomic-embed-text"
@@ -45,7 +46,7 @@ DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
 # Important inputs
-embedding_model, starter_prompt, llm_model, database = embedding_model_1, starter_prompt_1, ollama_model_1, "redis"
+embedding_model, starter_prompt, llm_model, database = embedding_model_2, starter_prompt_2, ollama_model_3, "redis"
 
 # Build csv file path
 model_name = (embedding_model if isinstance(embedding_model, str) else embedding_model._modules['0'].auto_model.config._name_or_path)

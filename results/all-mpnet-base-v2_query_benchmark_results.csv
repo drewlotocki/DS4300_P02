@@ -1,0 +1,19 @@
+Query,Model,Time (s),Memory Usage (MB)
+what is an AVL tree,all-mpnet-base-v2,0.5237224102020264,239.13671875
+what is the difference between B+ and AVL trees,all-mpnet-base-v2,1.4811930656433105,340.84375
+what are the 4 rotations for AVL trees,all-mpnet-base-v2,0.24614739418029785,140.4921875
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.17762517929077148,28.890625
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.18251633644104004,29.203125
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.14990019798278809,26.265625
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.15750503540039062,26.21875
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.16746091842651367,28.53125
+Compare Linear to Binary Search,sentence-transformers/all-mpnet-base-v2,0.16962313652038574,26.921875
+Describe CAP theorem in the context of Reddis?,sentence-transformers/all-mpnet-base-v2,0.1862010955810547,26.109375
+Describe CAP theorem in the context of Redis?,sentence-transformers/all-mpnet-base-v2,0.19866704940795898,30.734375
+Describe CAP and give an example of each principle?,sentence-transformers/all-mpnet-base-v2,0.18469595909118652,32.6875
+Describe CAP and give an example of each principle?,sentence-transformers/all-mpnet-base-v2,0.1944561004638672,28.65625
+Describe CAP and give an example of each principle?,sentence-transformers/all-mpnet-base-v2,0.20624613761901855,30.484375
+"Compare a Hash Table, an AVL Tree, and a B+ tree for storage of data?",sentence-transformers/all-mpnet-base-v2,0.17651605606079102,25.171875
+"Compare a Hash Table, an AVL Tree, and a B+ tree for storage of data?",sentence-transformers/all-mpnet-base-v2,0.18646001815795898,28.90625
+"Compare a Hash Table, an AVL Tree, and a B+ tree for storage of data?",sentence-transformers/all-mpnet-base-v2,0.175994873046875,25.296875
+"Compare a Hash Table, an AVL Tree, and a B+ tree for storage of data?",sentence-transformers/all-mpnet-base-v2,0.19296789169311523,30.703125
